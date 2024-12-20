@@ -3,6 +3,7 @@
 @using WeatherApp.Shared.Model
 @using WeatherApp.Shared.Services
 @inject IWeatherService WeatherService
+@inject IWeatherDataService WeatherDataService
 
 <PageTitle>Weather</PageTitle>
 
@@ -24,15 +25,49 @@
             <MudImage Src="@weatherData.Periods[0].Icon" Alt="Weather Icon" Width="100" Height="100" Elevation="25" Class="rounded-lg" />
             <MudText Typo="Typo.body1">Temperature: @weatherData.Periods[0].Temperature &deg;F</MudText>
             <MudText Typo="Typo.body1">Weather: @weatherData.Periods[0].ShortForecast</MudText>
+            <MudButton OnClick="@(() => AddWeatherRecord())" Color="Color.Secondary">Add</MudButton>
         }
     </MudPaper>
 </MudContainer>
-
+<br/>
+<MudContainer MaxWidth="MaxWidth.Small">
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.h4">Weather Records:</MudText>
+        @if (@weatherRecords.Count < 1)
+        {
+            <MudText Typo="Typo.body1"><em>No Weather Records Saved...</em></MudText>
+        }
+        else
+        {
+            <MudTable Items="@weatherRecords" Hover="true">
+                <HeaderContent>
+                    <MudTh>Start Time</MudTh>
+                    <MudTh>Icon</MudTh>
+                    <MudTh>Temperature</MudTh>
+                    <MudTh>Short Forecast</MudTh>
+                    <MudTh>Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.StartTime</MudTd>
+                    <MudTd><MudImage Src="@context.Icon" Alt="Weather Icon" Width="100" Height="100" Elevation="25" Class="rounded-lg" /></MudTd>
+                    <MudTd>@context.Temperature</MudTd>
+                    <MudTd>@context.ShortForecast</MudTd>
+                    <MudTd>
+                        <MudButton OnClick="@(() => EditWeatherRecord(context))" Color="Color.Secondary">Edit</MudButton>
+                        <MudButton OnClick="@(() => DeleteWeatherRecord(context.Id))" Color="Color.Error">Delete</MudButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudPaper>
+</MudContainer>
 
 @code {
     private string city = "chicago";
     private WeatherData? weatherData;
 
+    private List<WeatherRecord> weatherRecords = new();
+    
     private async Task GetWeather()
     {
         weatherData = null;
@@ -41,7 +76,32 @@
 
     protected override async Task OnInitializedAsync()
     {
-        
+        weatherRecords = await WeatherDataService.GetWeatherRecordsAsync();
     }
 
+    private async Task AddWeatherRecord()
+    {
+        var newWeatherRecord = new WeatherRecord()
+        { 
+            Id = Guid.NewGuid(),
+			StartTime = weatherData.Periods[0].StartTime,
+			Icon = weatherData.Periods[0].Icon,
+			Temperature = weatherData.Periods[0].Temperature,
+			ShortForecast = weatherData.Periods[0].ShortForecast
+        };
+
+        await WeatherDataService.AddWeatherRecordAsync(newWeatherRecord);
+        weatherRecords = await WeatherDataService.GetWeatherRecordsAsync();
+    }
+
+    private async Task EditWeatherRecord(WeatherRecord weatherRecord)
+    {
+        // Implement edit logic here
+    }
+
+    private async Task DeleteWeatherRecord(Guid id)
+    {
+        await WeatherDataService.DeleteWeatherRecordAsync(id);
+        weatherRecords = await WeatherDataService.GetWeatherRecordsAsync();
+    }
 }
