@@ -1,0 +1,47 @@
+﻿@page "/weather"
+@using MudBlazor
+@using WeatherApp.Shared.Model
+@using WeatherApp.Shared.Services
+@inject IWeatherService WeatherService
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+<MudContainer MaxWidth="MaxWidth.Small">
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.h4">Weather Forecast</MudText>
+        <MudTextField @bind-Value="city" Label="City" Variant="Variant.Outlined" />
+        <MudButton OnClick="GetWeather" Color="Color.Primary">Get Weather</MudButton>
+
+        @if (@weatherData == null)
+        {
+            <MudText Typo="Typo.body1"><em>Loading...</em></MudText>
+        }
+        else
+        {
+            <MudText Typo="Typo.body1">Date and Time: @weatherData.Periods[0].StartTime</MudText>
+            <MudImage Src="@weatherData.Periods[0].Icon" Alt="Weather Icon" Width="100" Height="100" Elevation="25" Class="rounded-lg" />
+            <MudText Typo="Typo.body1">Temperature: @weatherData.Periods[0].Temperature &deg;F</MudText>
+            <MudText Typo="Typo.body1">Weather: @weatherData.Periods[0].ShortForecast</MudText>
+        }
+    </MudPaper>
+</MudContainer>
+
+
+@code {
+    private string city = "chicago";
+    private WeatherData? weatherData;
+
+    private async Task GetWeather()
+    {
+        weatherData = null;
+        weatherData = await WeatherService.GetWeatherAsync(city);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
+
+}
