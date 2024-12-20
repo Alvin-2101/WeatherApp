@@ -1,0 +1,50 @@
+﻿@page "/editweather/{id:guid}"
+@using MudBlazor
+@using WeatherApp.Shared.Model
+@using WeatherApp.Shared.Services
+@inject IWeatherDataService WeatherDataService
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Weather Record</PageTitle>
+
+<h3>Edit Weather Record</h3>
+
+@if (weatherRecord == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@weatherRecord" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <MudTextField @bind-Value="weatherRecord.ShortForecast" Label="Short Forecast" Variant="Variant.Outlined" />
+
+        <MudButton Type="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" OnClick="OnValidSubmit">Save</MudButton>
+        <MudButton OnClick="Cancel" Color="Color.Secondary">Cancel</MudButton>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    public WeatherRecord? weatherRecord;
+
+    protected override async Task OnInitializedAsync()
+    {
+        weatherRecord = await WeatherDataService.GetWeatherRecordAsync(Id);
+    }
+
+    private async Task OnValidSubmit()
+    {
+        await WeatherDataService.UpdateWeatherRecordAsync(weatherRecord);
+        Navigation.NavigateTo("/weather");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/weather");
+    }
+}

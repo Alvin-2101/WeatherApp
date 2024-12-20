@@ -4,6 +4,7 @@
 @using WeatherApp.Shared.Services
 @inject IWeatherService WeatherService
 @inject IWeatherDataService WeatherDataService
+@inject NavigationManager Navigation
 
 <PageTitle>Weather</PageTitle>
 
@@ -53,7 +54,7 @@
                     <MudTd>@context.Temperature</MudTd>
                     <MudTd>@context.ShortForecast</MudTd>
                     <MudTd>
-                        <MudButton OnClick="@(() => EditWeatherRecord(context))" Color="Color.Secondary">Edit</MudButton>
+                        <MudButton OnClick="@(() => EditWeatherRecord(context.Id))" Color="Color.Secondary">Edit</MudButton>
                         <MudButton OnClick="@(() => DeleteWeatherRecord(context.Id))" Color="Color.Error">Delete</MudButton>
                     </MudTd>
                 </RowTemplate>
@@ -94,9 +95,9 @@
         weatherRecords = await WeatherDataService.GetWeatherRecordsAsync();
     }
 
-    private async Task EditWeatherRecord(WeatherRecord weatherRecord)
+    private async Task EditWeatherRecord(Guid id)
     {
-        // Implement edit logic here
+        Navigation.NavigateTo($"/editweather/{id}");
     }
 
     private async Task DeleteWeatherRecord(Guid id)
